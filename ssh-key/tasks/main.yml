@@ -1,21 +1,29 @@
 ---
 # tasks file for ssh-key
 
-  - name: Donwload ssh public key so that ormuco staff can access the instance
-    get_url: 
-        url: "{{ public_key_url }}"
-        dest: "~/.ssh/temp.pub"
+#  - name: Donwload ssh public key so that ormuco staff can access the instance
+#    get_url: 
+#        url: "{{ public_key_url }}"
+#        dest: "~/.ssh/temp.pub"
 
-  - name: Add public key to authorized_keys file
-    shell: "cat ~/.ssh/temp.pub >> ~/.ssh/authorized_keys; rm ~/.ssh/temp.pub"
+  
+#  - name: Add public key to authorized_keys file
+#    shell: "cat ~/.ssh/temp.pub >> ~/.ssh/authorized_keys; rm ~/.ssh/temp.pub"
+#
+  
+  - name: Copy private key to remote host for later repository clonning
+    copy:
+      src: ../../storage/private-keys/key_repo
+      dest: ~/.ssh/id_rsa
+      mode: '0400'
 
-  - name: Give right permissions to authorized_keys
-    file:
-        path: "~/.ssh/authorized_keys"
-        mode: "0600"
+#  - name: Give right permissions to authorized_keys
+#    file:
+#        path: "~/.ssh/authorized_keys"
+#        mode: "0600"
 
   - debug:
-        msg: "Loging with 'ssh -i <ormuco-private-key> ubuntu@{{ansible_host}}'"
+        msg: "Login with 'ssh -i <ormuco-private-key> ubuntu@{{ansible_host}}'"
 
 
 

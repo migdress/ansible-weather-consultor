@@ -38,10 +38,17 @@
         group: "{{ec2_remote_user}}"
     become: true
 
+  - name: Copy private key to remote server to allow repository cloning
+    copy:
+      src: ../../storage/private-keys/key_repo
+      dest: ~/.ssh/
+
   - name: Clone application into directory
     git:
-        repo: "https://github.com/migdress/express_basic_app.git"
+        repo: "git@bitbucket.org:migdress/weather-consultor.git"
         dest: "{{app_dir}}"
+        version: develop
+        accept_hostkey: yes
 
   - name: Create env files from example
     shell: "cp {{app_dir}}.env.example {{app_dir}}.env"
@@ -58,33 +65,37 @@
         regexp: 'REPLACE_PORT'
         replace: "{{app_port}}"
 
-  - name: Set up application database host
-    replace:
-        path: "{{app_dir}}.env"
-        regexp: 'REPLACE_DB_HOST'
-        replace: "{{database_host}}"
+#  - name: Set up application database host
+#    replace:
+#        path: "{{app_dir}}.env"
+#        regexp: 'REPLACE_DB_HOST'
+#        replace: "{{database_host}}"
+#
+#  - name: Set up application database name
+#    replace:
+#        path: "{{app_dir}}.env"
+#        regexp: 'REPLACE_DB_NAME'
+#        replace: "{{database_name}}"
+#        
+#  - name: Set up application database user
+#    replace:
+#        path: "{{app_dir}}.env"
+#        regexp: 'REPLACE_DB_USER'
+#        replace: "{{database_user}}"
+#
+#  - name: Set up application database password
+#    replace:
+#        path: "{{app_dir}}.env"
+#        regexp: 'REPLACE_DB_PASSWORD'
+#        replace: "{{database_password}}"
+#
+#  - name: Install NPM packages based on package.json.
+#    npm:
+#      path: "{{app_dir}}"
 
-  - name: Set up application database name
-    replace:
-        path: "{{app_dir}}.env"
-        regexp: 'REPLACE_DB_NAME'
-        replace: "{{database_name}}"
-        
-  - name: Set up application database user
-    replace:
-        path: "{{app_dir}}.env"
-        regexp: 'REPLACE_DB_USER'
-        replace: "{{database_user}}"
 
-  - name: Set up application database password
-    replace:
-        path: "{{app_dir}}.env"
-        regexp: 'REPLACE_DB_PASSWORD'
-        replace: "{{database_password}}"
-
-  - name: Install NPM packages based on package.json.
-    npm:
-        path: "{{app_dir}}"
+  - name: Install NPM packages based on package.json
+    shell: "cd {{app_dir}};npm install"
 
   - name: Kill all npm processes if present
     shell: "killall -q npm &2>/dev/null"
@@ -102,7 +113,7 @@
         path: "{{app_dir}}{{private_ip_address}}"
 
   - name: Start application
-    shell: "cd {{app_dir}}; sudo node bin/www"
+    shell: "cd {{app_dir}}; sudo npm start"
     async: 2592000 # 1 month
     poll: 0
 

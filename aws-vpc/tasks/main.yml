@@ -5,9 +5,12 @@
        name: "{{ vpc_name }}"
        cidr_block: "{{ vpc_cidr }}"
        region: "{{ region }}"
-       state: present
-       aws_access_key: "{{ aws_access_key }}"
-       aws_secret_key: "{{ aws_secret_key }}"
+       #state: present
+       tags:
+         module: ec2_vpc_net
+       #aws_access_key: "{{ aws_access_key }}"
+       #aws_secret_key: "{{ aws_secret_key }}"
+       tenancy: default
    register: vpc
 
  - name: associate subnet to the VPC
@@ -117,7 +120,7 @@
    lineinfile:
        path: hosts
        regexp: 'ec2_1'
-       line: "ec2_1 ansible_host={{item.public_ip}} ansible_ssh_user=ubuntu ansible_ssh_private_key_file={{ec2_key_directory}}key.ppk ansible_python_interpreter=/usr/bin/python3 private_ip_address={{ item.private_ip }}"
+       line: "ec2_1 ansible_host={{item.public_ip}} ansible_ssh_user=ubuntu ansible_ssh_private_key_file={{ec2_key_directory}}key ansible_python_interpreter=/usr/bin/python3 private_ip_address={{ item.private_ip }}"
    loop: "{{ec2_instance.instances}}"
  
  - name: Add created instance to host group
